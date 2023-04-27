@@ -1,0 +1,9 @@
+fastapi
+python-multipart
+uvicorn
+asyncio
+revChatGPT
+EdgeGPT
+BingImageCreator
+GoogleBard
+easy-ernie
