@@ -21,8 +21,8 @@ async def checkToken():
     while True:
         for token in CHATBOT.copy():
             chatBot = CHATBOT[token]
-            if auxiliary.getTimeStamp() - chatBot.get('useTimeStamp') > 5 * 60:
-                await chatBot.get('chatBot').close()
+            if auxiliary.getTimeStamp() - chatBot['useTimeStamp'] > 5 * 60:
+                await chatBot['chatBot'].close()
                 del chatBot
         await asyncio.sleep(60)
 
@@ -30,7 +30,7 @@ def getChatBot(token: str) -> tuple:
     global CHATBOT
     if token:
         if token in CHATBOT:
-            chatBot = CHATBOT.get(token).get('chatBot')
+            chatBot = CHATBOT[token]['chatBot']
         else:
             return token, None
     else:
@@ -56,35 +56,39 @@ def filterAnswer(answer: str) -> str:
     return answer
 
 def getAnswer(data: dict) -> str:
-    messages = data.get('item').get('messages')
-    if 'text' in messages[1]:
-        return filterAnswer(messages[1].get('text'))
-    else:
-        return filterAnswer(messages[1].get('adaptiveCards')[0].get('body')[0].get('text'))
+    messages = data['item']['messages']
+    for message in messages:
+        if 'suggestedResponses' in message:
+            if 'text' in message:
+                return filterAnswer(message['text'])
+            return filterAnswer(message['adaptiveCards'][0]['body'][0]['text'])
 
-def getStreamAnswer(data: dict) -> str:
-    messages = data.get('item').get('messages')
-    if 'text' in messages[1]:
-        answer = messages[1].get('text')
-    else:
-        answer = messages[1].get('adaptiveCards')[0].get('body')[0].get('text')
-    answer = filterAnswer(answer)
-    return answer
+def getSuggest(data: dict) -> list:
+    messages = data['item']['messages']
+    suggests = []
+    for message in messages:
+        suggestedResponses = message.get('suggestedResponses')
+        if suggestedResponses:
+            for suggestedResponse in suggestedResponses:
+                suggests.append(suggestedResponse['text'])
+    return suggests
 
 def getUrl(data: dict) -> list:
-    sourceAttributions = data.get('item').get('messages')[1].get('sourceAttributions')
+    messages = data['item']['messages']
     urls = []
-    if sourceAttributions:
-        for sourceAttribution in sourceAttributions:
-            urls.append({
-                'title': sourceAttribution.get('providerDisplayName'),
-                'url': sourceAttribution.get('seeMoreUrl')
-            })
+    for message in messages:
+        sourceAttributions = message.get('sourceAttributions')
+        if sourceAttributions:
+            for sourceAttribution in sourceAttributions:
+                urls.append({
+                    'title': sourceAttribution['providerDisplayName'],
+                    'url': sourceAttribution['seeMoreUrl']
+                })
     return urls
 
 def needReset(data: dict, answer: str) -> bool:
-    maxTimes = data.get('item').get('throttling').get('maxNumUserMessagesInConversation')
-    nowTimes = data.get('item').get('throttling').get('numUserMessagesInConversation')
+    maxTimes = data['item']['throttling']['maxNumUserMessagesInConversation']
+    nowTimes = data['item']['throttling']['numUserMessagesInConversation']
     errorAnswers = ['I’m still learning', '我还在学习']
     if [errorAnswer for errorAnswer in errorAnswers if errorAnswer in answer]:
         return True
@@ -108,11 +112,12 @@ async def ask(request: Request) -> Response:
         return core.GenerateResponse().error(120, 'token不存在')
     data = await chatBot.ask(question, conversation_style=getStyleEnum(style))
 
-    if data.get('item').get('result').get('value') == 'Throttled':
+    if data['item']['result']['value'] == 'Throttled':
         return core.GenerateResponse().error(120, '已上限,24小时后尝试')
 
     info = {
         'answer': '',
+        'suggests': [],
         'urls': [],
         'reset': False,
         'token': token
@@ -120,6 +125,7 @@ async def ask(request: Request) -> Response:
     answer = getAnswer(data)
     answer = filterAnswer(answer)
     info['answer'] = answer
+    info['suggests'] = getSuggest(data)
     info['urls'] = getUrl(data)
     
     if needReset(data, answer):
@@ -147,6 +153,7 @@ async def askStream(request: Request) -> Response:
         index = 0
         info = {
             'answer': '',
+            'suggests': [],
             'urls': [],
             'done': False,
             'reset': False,
@@ -161,16 +168,14 @@ async def askStream(request: Request) -> Response:
                     info['answer'] = answer
                     yield core.GenerateResponse().success(info, True)
             else:
-                if data.get('item').get('result').get('value') == 'Throttled':
+                if data['item']['result']['value'] == 'Throttled':
                     yield core.GenerateResponse().error(120, '已上限,24小时后尝试', True)
                     break
                 
-                messages = data.get('item').get('messages')
-                info['answer'] = getStreamAnswer(data)
-                if 'text' not in messages[1]:
-                    yield core.GenerateResponse().success(info, True)
-                info['done'] = True
+                info['answer'] = getAnswer(data)
+                info['suggests'] = getSuggest(data)
                 info['urls'] = getUrl(data)
+                info['done'] = True
 
                 if needReset(data, answer):
                     await chatBot.reset()
@@ -188,5 +193,5 @@ async def image(request: Request) -> Response:
     elif not auxiliary.isEnglish(keyword):
         return core.GenerateResponse().error(110, '仅支持英文')
     
-    cookie = auxiliary.getCookie('./cookie/bing.json', ['_U']).get('_U')
+    cookie = auxiliary.getCookie('./cookie/bing.json', ['_U'])['_U']
     return core.GenerateResponse().success(BingImageCreator.ImageGen(cookie).get_images(keyword))

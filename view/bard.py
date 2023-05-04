@@ -17,7 +17,7 @@ async def checkToken() -> None:
     while True:
         for token in CHATBOT.copy():
             chatBot = CHATBOT[token]
-            if auxiliary.getTimeStamp() - chatBot.get('useTimeStamp') > 5 * 60:
+            if auxiliary.getTimeStamp() - chatBot['useTimeStamp'] > 5 * 60:
                 del chatBot
         await asyncio.sleep(60)
 
@@ -27,7 +27,7 @@ def getChatBot(token: str) -> tuple:
         chatBot = CHATBOT[token]['chatBot']
         CHATBOT[token]['useTimeStamp'] = auxiliary.getTimeStamp()
     else:
-        chatBot = Chatbot(auxiliary.getCookie('./cookie/bard.json', '__Secure-1PSID').get('__Secure-1PSID'))
+        chatBot = Chatbot(auxiliary.getCookie('./cookie/bard.json', '__Secure-1PSID')['__Secure-1PSID'])
         token = str(uuid.uuid4())
         CHATBOT[token] = {}
         CHATBOT[token]['chatBot'] = chatBot
@@ -49,9 +49,9 @@ async def ask(request: Request) -> Response:
         return core.GenerateResponse().error(120, 'token不存在')
     data = chatBot.ask(question)
 
-    answer = data.get('content')
-    url = json.dumps(data.get('factualityQueries'))
-    urls = re.findall(r'"(http.*?)"',url)
+    answer = data['content']
+    url = json.dumps(data['factualityQueries'])
+    urls = re.findall(r'"(http.*?)"', url)
     
     return core.GenerateResponse().success({
         'answer': answer,

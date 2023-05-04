@@ -18,7 +18,7 @@ async def checkToken() -> None:
     while True:
         for token in CHATBOT.copy():
             chatBot = CHATBOT[token]
-            if auxiliary.getTimeStamp() - chatBot.get('useTimeStamp') > 5 * 60:
+            if auxiliary.getTimeStamp() - chatBot['useTimeStamp'] > 5 * 60:
                 del chatBot
         await asyncio.sleep(60)
 

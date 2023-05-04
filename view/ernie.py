@@ -17,8 +17,8 @@ async def checkToken() -> None:
     while True:
         for token in CHATBOT.copy():
             chatBot = CHATBOT[token]
-            if auxiliary.getTimeStamp() - chatBot.get('useTimeStamp') > 5 * 60:
-                chatBot.get('chatBot').close()
+            if auxiliary.getTimeStamp() - chatBot['useTimeStamp'] > 5 * 60:
+                chatBot['chatBot'].close()
                 del chatBot
         await asyncio.sleep(60)
 
@@ -26,12 +26,12 @@ def getChatBot(token: str) -> tuple:
     global CHATBOT
     if token:
         if token in CHATBOT:
-            chatBot = CHATBOT.get(token).get('chatBot')
+            chatBot = CHATBOT[token]['chatBot']
         else:
             return token, None
     else:
         cookie = auxiliary.getCookie('./cookie/ernie.json', ['BAIDUID', 'BDUSS_BFESS'])
-        chatBot = FastErnie(cookie.get('BAIDUID'), cookie.get('BDUSS_BFESS'))
+        chatBot = FastErnie(cookie['BAIDUID'], cookie['BDUSS_BFESS'])
         token = str(uuid.uuid4())
         CHATBOT[token] = {}
         CHATBOT[token]['chatBot'] = chatBot
@@ -52,8 +52,8 @@ async def ask(request: Request) -> Response:
     data = chatBot.ask(question)
 
     return core.GenerateResponse().success({
-        'answer': data.get('answer'),
-        'urls': data.get('urls'),
+        'answer': data['answer'],
+        'urls': data['urls'],
         'token': token
     })
 
@@ -72,9 +72,9 @@ async def askStream(request: Request) -> Response:
     def generate() -> Generator:
         for data in chatBot.askStream(question):
             yield core.GenerateResponse().success({
-                'answer': data.get('answer'),
-                'urls': data.get('urls'),
-                'done': data.get('done'),
+                'answer': data['answer'],
+                'urls': data['urls'],
+                'done': data['done'],
                 'token': token
             }, True)
 

@@ -18,7 +18,7 @@ def getCookie(filePath: str, names: str=[]) -> dict:
     with open(filePath, encoding='utf-8') as file:
         cookies = json.load(file)
         for cookie in cookies:
-            name = cookie.get('name')
+            name = cookie['name']
             if name in names:
-                cookie_[name] = cookie.get('value')
+                cookie_[name] = cookie['value']
     return cookie_
