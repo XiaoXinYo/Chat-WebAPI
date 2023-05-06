@@ -1,7 +1,7 @@
 ## 提示
 1. 升级咯,此仓库前身为Bing-Chat,现已更名为Chat-API,支持多种Chat,现已支持ChatGPT,Bing Chat,Bard,文心一言.
 2. 若报错,请先将ChatGPT,EdgeGPT,BingImageCreator,GoogleBard,easy-ernie更新到最新版本.
-3. 目前已知New Bing,文心一言有封号风险.
+3. 已知New Bing,文心一言有封号风险.
 ---
 ![Release](https://img.shields.io/badge/Release-0.1.0-blue)
 ---
