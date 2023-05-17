@@ -4,8 +4,8 @@
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from view import chatgpt, bing, bard, ernie
+from module import chat_bot, core
 import asyncio
-from module import core
 import config
 import uvicorn
 
@@ -18,16 +18,13 @@ APP.add_middleware(
     allow_headers=['*'],
 )
 APP.include_router(chatgpt.CHATGPT_APP, prefix='/chatgpt')
-APP.include_router(bing.BingAPP, prefix='/bing')
-APP.include_router(bard.BardAPP, prefix='/bard')
+APP.include_router(bing.BING_APP, prefix='/bing')
+APP.include_router(bard.Bard_APP, prefix='/bard')
 APP.include_router(ernie.ERNIE_APP, prefix='/ernie')
 
 @APP.on_event('startup')
 async def startup() -> None:
-    asyncio.get_event_loop().create_task(chatgpt.checkToken())
-    asyncio.get_event_loop().create_task(bing.checkToken())
-    asyncio.get_event_loop().create_task(bard.checkToken())
-    asyncio.get_event_loop().create_task(ernie.checkToken())
+    asyncio.get_event_loop().create_task(chat_bot.checkChatBot())
 
 @APP.exception_handler(404)
 def error404(request: Request, exc: Exception) -> Response:

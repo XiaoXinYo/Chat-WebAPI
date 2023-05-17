@@ -13,7 +13,7 @@ def getTimeStamp(ms: bool=False) -> int:
 def isEnglish(keyword: str) -> bool:
     return re.match(r'[a-zA-Z]', keyword)
 
-def getCookie(filePath: str, names: str=[]) -> dict:
+def getCookie(filePath: str, names: list=[]) -> dict:
     cookie_ = {}
     with open(filePath, encoding='utf-8') as file:
         cookies = json.load(file)
