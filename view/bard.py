@@ -2,39 +2,13 @@
 # Author: XiaoXinYo
 
 from fastapi import APIRouter, Request, Response
-from module import core, auxiliary
-import asyncio
-from Bard import Chatbot
-import uuid
+from module import core, auxiliary, chat_bot
 import json
 import re
 
-BardAPP = APIRouter()
-CHATBOT = {}
+Bard_APP = APIRouter()
 
-async def checkToken() -> None:
-    global CHATBOT
-    while True:
-        for token in CHATBOT.copy():
-            chatBot = CHATBOT[token]
-            if auxiliary.getTimeStamp() - chatBot['useTimeStamp'] > 5 * 60:
-                del chatBot
-        await asyncio.sleep(60)
-
-def getChatBot(token: str) -> tuple:
-    global CHATBOT
-    if token in CHATBOT:
-        chatBot = CHATBOT[token]['chatBot']
-        CHATBOT[token]['useTimeStamp'] = auxiliary.getTimeStamp()
-    else:
-        chatBot = Chatbot(auxiliary.getCookie('./cookie/bard.json', '__Secure-1PSID')['__Secure-1PSID'])
-        token = str(uuid.uuid4())
-        CHATBOT[token] = {}
-        CHATBOT[token]['chatBot'] = chatBot
-        CHATBOT[token]['useTimeStamp'] = auxiliary.getTimeStamp()
-    return token, chatBot
-
-@BardAPP.route('/ask', methods=['GET', 'POST'])
+@Bard_APP.route('/ask', methods=['GET', 'POST'])
 async def ask(request: Request) -> Response:
     parameter = await core.getrequestParameter(request)
     question = parameter.get('question')
@@ -42,13 +16,17 @@ async def ask(request: Request) -> Response:
     if not question:
         return core.GenerateResponse().error(110, '参数不能为空')
     elif not auxiliary.isEnglish(question):
-        return core.GenerateResponse().error(110, '仅支持英文')
-    
-    token, chatBot = getChatBot(token)
-    if not chatBot:
-        return core.GenerateResponse().error(120, 'token不存在')
-    data = chatBot.ask(question)
+        return core.GenerateResponse().error(110, 'question仅支持英文')
 
+    if token:
+        chatBot = chat_bot.getChatBot(token)
+        if not chatBot:
+            return core.GenerateResponse().error(120, 'token不存在')
+        chatBot = chatBot['chatBot']
+    else:
+        token, chatBot = chat_bot.generateChatBot('Bard')
+
+    data = chatBot.ask(question)
     answer = data['content']
     url = json.dumps(data['factualityQueries'])
     urls = re.findall(r'"(http.*?)"', url)
