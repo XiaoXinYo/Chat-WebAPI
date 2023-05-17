@@ -1,0 +1,56 @@
+name: BUG提交
+description: BUG提交
+title: "[Bug]: "
+body:
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 在提交前请确保以下这些
+      options:
+        - label: ChatGPT,EdgeGPT,BingImageCreator,GoogleBard,easy-ernie为最新版本
+          required: true
+        - label: 在Issue无法找到它
+          required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: 操作系统
+      multiple: true
+      options:
+        - Linux
+        - Windows
+        - MacOS
+        - Android
+        - iOS
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: python-version
+    attributes:
+      label: Python版本
+      description: "`python3 -V`"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: 问题
+    validations:
+      required: true
+  - type: textarea
+    id: trigger
+    attributes:
+      label: 触发
+      description: 如何触发这个问题的,提供相关代码.
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: 报错
+      description: 提供报错输出.
+  - type: textarea
+    id: other
+    attributes:
+      label: 其他

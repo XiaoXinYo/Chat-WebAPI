@@ -1,0 +1,17 @@
+name: 功能建议
+description: 功能建议
+title: "[Feature]: "
+body:
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 在提交前请确保以下这些
+      options:
+        - label: 在Issue无法找到它
+          required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: 描述
+    validations:
+      required: true
