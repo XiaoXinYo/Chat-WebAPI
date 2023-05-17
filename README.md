@@ -3,7 +3,7 @@
 2. 若报错,请先将ChatGPT,EdgeGPT,BingImageCreator,GoogleBard,easy-ernie更新到最新版本.
 3. 已知New Bing,文心一言有封号风险.
 ---
-![Release](https://img.shields.io/badge/Release-0.1.0-blue)
+![Release](https://img.shields.io/badge/Release-0.1.1-blue)
 ---
 ## 介绍
 一款基于Python-FastAPI框架,开发的多种Chat接口程序.
@@ -12,9 +12,7 @@
 2. 包: fastapi,python-multipart,uvicorn,asyncio,EdgeGPT,BingImageCreator,GoogleBard,easy-ernie
 3. 其他: New Bing账户,Bard账户,文心一言账户.
 ## 配置(config.py)
-1. 监听地址和端口分别在第4行和第5行.
-2. Proxy在第6行.
-3. ChatGPT密钥在第7行.
+详情进入文件查看.
 ## Cookie(cookie/)
 1. 浏览器安装Cookie-Editor扩展.
 2. 访问[Bing Chat](https://www.bing.com/chat)/[Bard](https://bard.google.com)/[文心一言](https://yiyan.baidu.com).
