@@ -21,7 +21,7 @@
 5. 将复制的内容粘贴到对应的Cookie文件.
 ## 部署
 1. Windows: 运行main.py.
-2. Linux: 执行`gunicorn -c gunicorn.py`.
+2. Linux: 执行`gunicorn main:APP -c gunicorn.py`.
 3. 支持Docker.
 ## 接口文档
 查看[Wiki](https://github.com/XiaoXinYo/Chat-API/wiki).  
