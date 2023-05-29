@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 # Author: XiaoXinYo
 
-HOST = '0.0.0.0' # 监听地址
-PORT = 5000 # 监听端口
+HOST = '0.0.0.0' # 地址
+PORT = 5000 # 端口
+SSL = {
+    'enable': False, # 启用SSL
+    'keyPath': '', # SSL Key路径
+    'certPath': '' # SSL Cert路径
+}
 
 PROXY = '' # 代理
 
-CHATGPT_KEY = '' # ChatGPT密钥
+CHATGPT_KEY = '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' # ChatGPT密钥
 
 TOKEN_USE_MAX_TIME_INTERVAL = 30 # Token使用最大时间间隔(分钟),超过此时间未使用将被删除
 
