@@ -10,21 +10,29 @@ import easy_ernie
 import config
 import asyncio
 import uuid
+import json
 
 CHAT_BOT = {}
+
+BARD_COOKIE = auxiliary.getCookie('./cookie/bard.json', ['__Secure-1PSID'])
+with open('./cookie/bing.json', 'r') as file:
+    BING_COOKIE = json.load(file)
+ERNIE_COOKIE = auxiliary.getCookie('./cookie/ernie.json', ['BAIDUID', 'BDUSS_BFESS'])
 
 def generateChatBot(type_: str) -> Union[tuple, None]:
     global CHAT_BOT
     token = str(uuid.uuid4())
     if type_ == 'Bard':
-        chatBot = Bard.Chatbot(auxiliary.getCookie('./cookie/bard.json', ['__Secure-1PSID'])['__Secure-1PSID'], proxy=config.PROXY)
+        chatBot = Bard.Chatbot(BARD_COOKIE['__Secure-1PSID'], proxy={
+            'http': config.PROXY,
+            'https': config.PROXY
+        } if config.PROXY else None)
     elif type_ == 'Bing':
-        chatBot = EdgeGPT.Chatbot(proxy=config.PROXY, cookie_path='./cookie/bing.json')
+        chatBot = EdgeGPT.Chatbot(proxy=config.PROXY, cookies=BING_COOKIE)
     elif type_ == 'ChatGPT':
         chatBot = revChatGPT.V3.Chatbot(config.CHATGPT_KEY, proxy=config.PROXY)
     elif type_ == 'Ernie':
-        cookie = auxiliary.getCookie('./cookie/ernie.json', ['BAIDUID', 'BDUSS_BFESS'])
-        chatBot = easy_ernie.FastErnie(cookie['BAIDUID'], cookie['BDUSS_BFESS'])
+        chatBot = easy_ernie.FastErnie(ERNIE_COOKIE['BAIDUID'], ERNIE_COOKIE['BDUSS_BFESS'])
     else:
         return None
     CHAT_BOT[token] = {}
@@ -37,10 +45,10 @@ def getChatBot(token: str) -> Union[dict, None]:
     global CHAT_BOT
     if token in CHAT_BOT:
         CHAT_BOT[token]['useTimeStamp'] = auxiliary.getTimeStamp()
-        return CHAT_BOT[token]
+        return CHAT_BOT[token]['chatBot']
     return None
 
-async def checkChatBot() -> None:
+async def checkChatBot(loop=True) -> None:
     global CHAT_BOT
     while True:
         for token in CHAT_BOT.copy():
@@ -51,4 +59,7 @@ async def checkChatBot() -> None:
                 elif chatBot['type'] == 'Ernie':
                     chatBot['chatBot'].close()
                 del chatBot
-        await asyncio.sleep(60)
+        if loop:
+            await asyncio.sleep(60)
+        else:
+            break
