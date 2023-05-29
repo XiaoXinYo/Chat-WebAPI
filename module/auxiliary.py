@@ -15,7 +15,7 @@ def isEnglish(keyword: str) -> bool:
 
 def getCookie(filePath: str, names: list=[]) -> dict:
     cookie_ = {}
-    with open(filePath, encoding='utf-8') as file:
+    with open(filePath) as file:
         cookies = json.load(file)
         for cookie in cookies:
             name = cookie['name']
