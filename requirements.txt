@@ -1,6 +1,8 @@
 fastapi
 python-multipart
 uvicorn
+gevent
+gunicorn
 asyncio
 revChatGPT
 EdgeGPT
