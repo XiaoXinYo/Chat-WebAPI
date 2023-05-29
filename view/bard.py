@@ -22,7 +22,6 @@ async def ask(request: Request) -> Response:
         chatBot = chat_bot.getChatBot(token)
         if not chatBot:
             return core.GenerateResponse().error(120, 'token不存在')
-        chatBot = chatBot['chatBot']
     else:
         token, chatBot = chat_bot.generateChatBot('Bard')
 
@@ -30,6 +29,7 @@ async def ask(request: Request) -> Response:
     answer = data['content']
     url = json.dumps(data['factualityQueries'])
     urls = re.findall(r'"(http.*?)"', url)
+    urls.extend(list(data['images']))
     
     return core.GenerateResponse().success({
         'answer': answer,

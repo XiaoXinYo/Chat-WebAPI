@@ -15,13 +15,11 @@ async def ask(request: Request) -> Response:
     token = parameter.get('token')
     if not question:
         return core.GenerateResponse().error(110, '参数不能为空')
-    
 
     if token:
         chatBot = chat_bot.getChatBot(token)
         if not chatBot:
             return core.GenerateResponse().error(120, 'token不存在')
-        chatBot = chatBot['chatBot']
     else:
         token, chatBot = chat_bot.generateChatBot('Ernie')
 
@@ -38,13 +36,12 @@ async def askStream(request: Request) -> Response:
     question = parameter.get('question')
     token = parameter.get('token')
     if not question:
-        return core.GenerateResponse().error(110, '参数不能为空')
+        return core.GenerateResponse().error(110, '参数不能为空', streamResponse=True)
     
     if token:
         chatBot = chat_bot.getChatBot(token)
         if not chatBot:
-            return core.GenerateResponse().error(120, 'token不存在')
-        chatBot = chatBot['chatBot']
+            return core.GenerateResponse().error(120, 'token不存在', streamResponse=True)
     else:
         token, chatBot = chat_bot.generateChatBot('Ernie')
     

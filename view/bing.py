@@ -35,10 +35,11 @@ def filterAnswer(answer: str) -> str:
 def getAnswer(data: dict) -> str:
     messages = data['item']['messages']
     for message in messages:
-        if 'suggestedResponses' in message:
+        if 'sourceAttributions' in message:
             if 'text' in message:
                 return filterAnswer(message['text'])
             return filterAnswer(message['adaptiveCards'][0]['body'][0]['text'])
+    return ''
 
 def getSuggest(data: dict) -> list:
     messages = data['item']['messages']
@@ -64,13 +65,17 @@ def getUrl(data: dict) -> list:
     return urls
 
 def needReset(data: dict, answer: str) -> bool:
+    errorAnswers = ['I’m still learning', '我还在学习']
     maxTimes = data['item']['throttling']['maxNumUserMessagesInConversation']
     nowTimes = data['item']['throttling']['numUserMessagesInConversation']
-    errorAnswers = ['I’m still learning', '我还在学习']
     if [errorAnswer for errorAnswer in errorAnswers if errorAnswer in answer]:
         return True
     elif nowTimes == maxTimes:
         return True
+    messages = data['item']['messages']
+    for message in messages:
+        if message.get('hiddenText') == '> Conversation disengaged':
+            return True
     return False
 
 @BING_APP.route('/ask', methods=['GET', 'POST'])
@@ -91,7 +96,6 @@ async def ask(request: Request) -> Response:
         chatBot = chat_bot.getChatBot(token)
         if not chatBot:
             return core.GenerateResponse().error(120, 'token不存在')
-        chatBot = chatBot['chatBot']
     else:
         token, chatBot = chat_bot.generateChatBot('Bing')
 
@@ -126,17 +130,16 @@ async def askStream(request: Request) -> Response:
     prompt = parameter.get('prompt') or ''
     token = parameter.get('token')
     if not question:
-        return core.GenerateResponse().error(110, '参数不能为空')
+        return core.GenerateResponse().error(110, '参数不能为空', streamResponse=True)
     elif style not in STYLES:
-        return core.GenerateResponse().error(110, 'style不存在')
+        return core.GenerateResponse().error(110, 'style不存在', streamResponse=True)
     elif prompt and not auxiliary.isEnglish(prompt):
-        return core.GenerateResponse().error(110, 'prompt仅支持英文')
+        return core.GenerateResponse().error(110, 'prompt仅支持英文', streamResponse=True)
 
     if token:
         chatBot = chat_bot.getChatBot(token)
         if not chatBot:
-            return core.GenerateResponse().error(120, 'token不存在')
-        chatBot = chatBot['chatBot']
+            return core.GenerateResponse().error(120, 'token不存在', streamResponse=True)
     else:
         token, chatBot = chat_bot.generateChatBot('Bing')
     
