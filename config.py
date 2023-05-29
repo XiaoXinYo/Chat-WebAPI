@@ -11,7 +11,7 @@ SSL = {
 
 PROXY = '' # 代理
 
-CHATGPT_KEY = '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' # ChatGPT密钥
+CHATGPT_KEY = '' # ChatGPT密钥
 
 TOKEN_USE_MAX_TIME_INTERVAL = 30 # Token使用最大时间间隔(分钟),超过此时间未使用将被删除
 
