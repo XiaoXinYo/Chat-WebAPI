@@ -11,6 +11,7 @@ import config
 import asyncio
 import uuid
 import json
+import pickle
 
 CHAT_BOT = {}
 
@@ -18,6 +19,7 @@ BARD_COOKIE = auxiliary.getCookie('./cookie/bard.json', ['__Secure-1PSID'])
 with open('./cookie/bing.json', 'r') as file:
     BING_COOKIE = json.load(file)
 ERNIE_COOKIE = auxiliary.getCookie('./cookie/ernie.json', ['BAIDUID', 'BDUSS_BFESS'])
+
 
 def generateChatBot(type_: str) -> Union[tuple, None]:
     global CHAT_BOT
@@ -39,14 +41,25 @@ def generateChatBot(type_: str) -> Union[tuple, None]:
     CHAT_BOT[token]['type'] = type_
     CHAT_BOT[token]['chatBot'] = chatBot
     CHAT_BOT[token]['useTimeStamp'] = auxiliary.getTimeStamp()
+    # 将CHAT_BOT对象通过文件储存
+    with open('token.pkl', 'wb') as f:
+        pklData = pickle.dumps(CHAT_BOT)
+        f.write(pklData)
     return token, chatBot
 
+
 def getChatBot(token: str) -> Union[dict, None]:
+    # 从文件中重新读取CHAT_BOT对象
+    _CHAT_BOT = object
+    with open('token.pkl','rb') as f:
+        objectData = pickle.loads(file.read())
+        _CHAT_BOT = objectData
     global CHAT_BOT
     if token in CHAT_BOT:
         CHAT_BOT[token]['useTimeStamp'] = auxiliary.getTimeStamp()
         return CHAT_BOT[token]['chatBot']
     return None
+
 
 async def checkChatBot(loop=True) -> None:
     global CHAT_BOT
