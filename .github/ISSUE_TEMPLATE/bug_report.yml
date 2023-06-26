@@ -7,7 +7,9 @@ body:
     attributes:
       label: 在提交前请确保以下这些
       options:
-        - label: ChatGPT,EdgeGPT,BingImageCreator,GoogleBard,easy-ernie为最新版本
+        - label: Chat-API为最新版本
+          required: true
+        - label: revChatGPT,EdgeGPT,BingImageCreator,GoogleBard,easy-ernie为最新版本
           required: true
         - label: 在Issue无法找到它
           required: true
