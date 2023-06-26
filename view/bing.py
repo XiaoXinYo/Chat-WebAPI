@@ -5,13 +5,14 @@ from typing import Union, AsyncGenerator
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import StreamingResponse
 from module import auxiliary, core, chat_bot
-from EdgeGPT import ConversationStyle
+from EdgeGPT.conversation_style import ConversationStyle
 import config
 import re
 import BingImageCreator
 
 BING_APP = APIRouter()
 STYLES = ['balanced', 'creative', 'precise']
+IMAGE_COOKIE = auxiliary.getCookie('./cookie/bing.json', ['_U'])['_U']
 
 def getStyleEnum(style: str) -> ConversationStyle:
     enum = ConversationStyle
@@ -187,6 +188,5 @@ async def image(request: Request) -> Response:
         return core.GenerateResponse().error(110, '参数不能为空')
     elif not auxiliary.isEnglish(keyword):
         return core.GenerateResponse().error(110, 'keyword仅支持英文')
-    
-    cookie = auxiliary.getCookie('./cookie/bing.json', ['_U'])['_U']
-    return core.GenerateResponse().success(BingImageCreator.ImageGen(cookie).get_images(keyword))
+
+    return core.GenerateResponse().success(BingImageCreator.ImageGen(IMAGE_COOKIE, all_cookies=chat_bot.BING_COOKIE).get_images(keyword))

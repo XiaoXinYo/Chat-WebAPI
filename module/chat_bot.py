@@ -4,7 +4,7 @@
 from typing import Union
 from module import auxiliary
 import Bard
-import EdgeGPT
+import EdgeGPT.EdgeGPT
 import revChatGPT.V3
 import easy_ernie
 import config
@@ -28,7 +28,7 @@ def generateChatBot(type_: str) -> Union[tuple, None]:
             'https': config.PROXY
         } if config.PROXY else None)
     elif type_ == 'Bing':
-        chatBot = EdgeGPT.Chatbot(proxy=config.PROXY, cookies=BING_COOKIE)
+        chatBot = EdgeGPT.EdgeGPT.Chatbot(proxy=config.PROXY, cookies=BING_COOKIE)
     elif type_ == 'ChatGPT':
         chatBot = revChatGPT.V3.Chatbot(config.CHATGPT_KEY, proxy=config.PROXY)
     elif type_ == 'Ernie':
@@ -58,7 +58,7 @@ async def checkChatBot(loop=True) -> None:
                     await chatBot['chatBot'].close()
                 elif chatBot['type'] == 'Ernie':
                     chatBot['chatBot'].close()
-                del chatBot
+                del CHAT_BOT[token]
         if loop:
             await asyncio.sleep(60)
         else:
