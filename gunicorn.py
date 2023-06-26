@@ -3,7 +3,7 @@
 
 from config import HOST, PORT, SSL
 
-workers = 5
+workers = 1
 worker_class = 'uvicorn.workers.UvicornWorker'
 
 bind = f'{HOST}:{PORT}'

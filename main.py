@@ -37,9 +37,9 @@ async def middleware(request: Request, call_next) -> None:
         model = urls[1]
         mode = urls[2]
         if mode == 'ask':
-            generate = lambda model_: core.GenerateResponse().error(110, f'{model_}未配置')
+            generate = lambda model_: core.GenerateResponse().error(100, f'{model_}未配置')
         else:
-            generate = lambda model_: core.GenerateResponse().error(110, f'{model_}未配置', streamResponse=True)
+            generate = lambda model_: core.GenerateResponse().error(100, f'{model_}未配置', streamResponse=True)
         if model == 'bard':
             if not chat_bot.BARD_COOKIE:
                 return generate('Bard')

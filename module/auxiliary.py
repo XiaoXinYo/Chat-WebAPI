@@ -16,7 +16,10 @@ def isEnglish(keyword: str) -> bool:
 def getCookie(filePath: str, names: list=[]) -> dict:
     cookie_ = {}
     with open(filePath) as file:
-        cookies = json.load(file)
+        try:
+            cookies = json.load(file)
+        except:
+            return cookie_
         for cookie in cookies:
             name = cookie['name']
             if name in names:
