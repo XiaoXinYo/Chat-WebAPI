@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-# Author: XiaoXinYo
-
 from typing import Generator
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import StreamingResponse
@@ -10,7 +7,7 @@ CHATGPT_APP = APIRouter()
 
 @CHATGPT_APP.route('/ask', methods=['GET', 'POST'])
 async def ask(request: Request) -> Response:
-    parameter = await core.getrequestParameter(request)
+    parameter = await core.getRequestParameter(request)
     question = parameter.get('question')
     token = parameter.get('token')
     if not question:
@@ -34,7 +31,7 @@ async def ask(request: Request) -> Response:
 
 @CHATGPT_APP.route('/ask_stream', methods=['GET', 'POST'])
 async def askStream(request: Request) -> Response:
-    parameter = await core.getrequestParameter(request)
+    parameter = await core.getRequestParameter(request)
     question = parameter.get('question')
     token = parameter.get('token')
     if not question:
@@ -65,6 +62,5 @@ async def askStream(request: Request) -> Response:
                 'token': token
             }, True)
         except:
-            yield core.GenerateResponse().error(500, '未知错误', True)
-
+            yield core.GenerateResponse().error(500, '未知错误', streamFormat=True)
     return StreamingResponse(generate(), media_type='text/event-stream')
