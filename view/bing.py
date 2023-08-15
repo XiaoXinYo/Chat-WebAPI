@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-# Author: XiaoXinYo
-
-from typing import Union, AsyncGenerator
+from typing import Optional, AsyncGenerator
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import StreamingResponse
 from module import auxiliary, core, chat_bot
@@ -24,7 +21,7 @@ def getStyleEnum(style: str) -> ConversationStyle:
         enum = enum.precise
     return enum
 
-def getPrompt(prompt: Union[str, None]) -> Union[str, None]:
+def getPrompt(prompt: Optional[str]) -> Optional[str]:
     if prompt:
         return f'[system](#additional_instructions)\n{config.BING_PROMPT.get(prompt, prompt)}'
     return None
@@ -36,10 +33,11 @@ def filterAnswer(answer: str) -> str:
 def getAnswer(data: dict) -> str:
     messages = data['item']['messages']
     for message in messages:
-        if 'sourceAttributions' in message:
-            if 'text' in message:
-                return filterAnswer(message['text'])
-            return filterAnswer(message['adaptiveCards'][0]['body'][0]['text'])
+        if 'sourceAttributions' not in message:
+            continue
+        if 'text' in message:
+            return filterAnswer(message['text'])
+        return filterAnswer(message['adaptiveCards'][0]['body'][0]['text'])
     return ''
 
 def getSuggest(data: dict) -> list:
@@ -47,9 +45,10 @@ def getSuggest(data: dict) -> list:
     suggests = []
     for message in messages:
         suggestedResponses = message.get('suggestedResponses')
-        if suggestedResponses:
-            for suggestedResponse in suggestedResponses:
-                suggests.append(suggestedResponse['text'])
+        if not suggestedResponses:
+            continue
+        for suggestedResponse in suggestedResponses:
+            suggests.append(suggestedResponse['text'])
     return suggests
 
 def getUrl(data: dict) -> list:
@@ -57,12 +56,13 @@ def getUrl(data: dict) -> list:
     urls = []
     for message in messages:
         sourceAttributions = message.get('sourceAttributions')
-        if sourceAttributions:
-            for sourceAttribution in sourceAttributions:
-                urls.append({
-                    'title': sourceAttribution['providerDisplayName'],
-                    'url': sourceAttribution['seeMoreUrl']
-                })
+        if not sourceAttributions:
+            continue
+        for sourceAttribution in sourceAttributions:
+            urls.append({
+                'title': sourceAttribution['providerDisplayName'],
+                'url': sourceAttribution['seeMoreUrl']
+            })
     return urls
 
 def needReset(data: dict, answer: str) -> bool:
@@ -81,7 +81,7 @@ def needReset(data: dict, answer: str) -> bool:
 
 @BING_APP.route('/ask', methods=['GET', 'POST'])
 async def ask(request: Request) -> Response:
-    parameter = await core.getrequestParameter(request)
+    parameter = await core.getRequestParameter(request)
     question = parameter.get('question')
     style = parameter.get('style') or 'balanced'
     prompt = parameter.get('prompt') or ''
@@ -120,12 +120,12 @@ async def ask(request: Request) -> Response:
     if needReset(data, answer):
         await chatBot.reset()
         info['reset'] = True
-    
+
     return core.GenerateResponse().success(info)
 
 @BING_APP.route('/ask_stream', methods=['GET', 'POST'])
 async def askStream(request: Request) -> Response:
-    parameter = await core.getrequestParameter(request)
+    parameter = await core.getRequestParameter(request)
     question = parameter.get('question')
     style = parameter.get('style') or 'balanced'
     prompt = parameter.get('prompt') or ''
@@ -161,10 +161,10 @@ async def askStream(request: Request) -> Response:
                 answer = filterAnswer(answer)
                 if answer:
                     info['answer'] = answer
-                    yield core.GenerateResponse().success(info, True)
+                    yield core.GenerateResponse().success(info, streamFormat=True)
             else:
                 if data['item']['result']['value'] == 'Throttled':
-                    yield core.GenerateResponse().error(120, '已上限,24小时后尝试', True)
+                    yield core.GenerateResponse().error(120, '已上限,24小时后尝试', streamFormat=True)
                     break
 
                 answer = getAnswer(data)
@@ -177,13 +177,12 @@ async def askStream(request: Request) -> Response:
                     await chatBot.reset()
                     info['reset'] = True
                 
-                yield core.GenerateResponse().success(info, True)
-    
+                yield core.GenerateResponse().success(info, streamFormat=True)
     return StreamingResponse(generator(), media_type='text/event-stream')
 
 @BING_APP.route('/image', methods=['GET', 'POST'])
 async def image(request: Request) -> Response:
-    keyword = (await core.getrequestParameter(request)).get('keyword')
+    keyword = (await core.getRequestParameter(request)).get('keyword')
     if not keyword:
         return core.GenerateResponse().error(110, '参数不能为空')
     elif not auxiliary.isEnglish(keyword):
