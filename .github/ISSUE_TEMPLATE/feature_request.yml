@@ -1,6 +1,6 @@
 name: 功能建议
 description: 功能建议
-title: "[Feature]: "
+title: '[Feature]: '
 body:
   - type: checkboxes
     id: confirm
