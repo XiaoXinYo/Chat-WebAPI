@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-# Author: XiaoXinYo
+import nest_asyncio
+nest_asyncio.apply()
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -24,11 +24,11 @@ APP.include_router(ernie.ERNIE_APP, prefix='/ernie')
 
 @APP.on_event('startup')
 async def startup() -> None:
-    asyncio.get_event_loop().create_task(chat_bot.checkChatBot())
+    asyncio.create_task(chat_bot.checkChatBot())
 
 @APP.on_event('shutdown')
 async def shutdown() -> None:
-    asyncio.get_event_loop().create_task(chat_bot.checkChatBot(False))
+    asyncio.create_task(chat_bot.checkChatBot(False))
 
 @APP.middleware('http')
 async def middleware(request: Request, call_next) -> None:
@@ -58,11 +58,11 @@ async def middleware(request: Request, call_next) -> None:
 
 @APP.exception_handler(404)
 def error404(request: Request, exc: Exception) -> Response:
-    return core.GenerateResponse().error(404, '未找到文件')
+    return core.GenerateResponse().error(404, '未找到文件', httpCode=404)
 
 @APP.exception_handler(500)
 def error500(request: Request, exc: Exception) -> Response:
-    return core.GenerateResponse().error(500, '未知错误')
+    return core.GenerateResponse().error(500, '未知错误', httpCode=500)
 
 if __name__ == '__main__':
     appConfig = {

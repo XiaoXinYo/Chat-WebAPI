@@ -4,8 +4,9 @@ uvicorn
 gevent
 gunicorn
 asyncio
-revChatGPT
+nest_asyncio
+GoogleBard
 EdgeGPT
 BingImageCreator
-GoogleBard
+revChatGPT
 easy-ernie
