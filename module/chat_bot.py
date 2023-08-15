@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-# Author: XiaoXinYo
-
 from typing import Union
 from module import auxiliary
 import Bard
@@ -14,7 +11,7 @@ import json
 
 CHAT_BOT = {}
 
-BARD_COOKIE = auxiliary.getCookie('./cookie/bard.json', ['__Secure-1PSID'])
+BARD_COOKIE = auxiliary.getCookie('./cookie/bard.json', ['__Secure-1PSID', '__Secure-1PSIDTS'])
 with open('./cookie/bing.json', 'r') as file:
     BING_COOKIE = json.load(file)
 ERNIE_COOKIE = auxiliary.getCookie('./cookie/ernie.json', ['BAIDUID', 'BDUSS_BFESS'])
@@ -23,7 +20,7 @@ def generateChatBot(type_: str) -> Union[tuple, None]:
     global CHAT_BOT
     token = str(uuid.uuid4())
     if type_ == 'Bard':
-        chatBot = Bard.Chatbot(BARD_COOKIE['__Secure-1PSID'], proxy={
+        chatBot = Bard.Chatbot(BARD_COOKIE['__Secure-1PSID'], BARD_COOKIE['__Secure-1PSIDTS'], proxy={
             'http': config.PROXY,
             'https': config.PROXY
         } if config.PROXY else None)

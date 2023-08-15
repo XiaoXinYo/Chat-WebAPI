@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-# Author: XiaoXinYo
-
 from config import HOST, PORT, SSL
 
 workers = 1

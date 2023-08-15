@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
-# Author: XiaoXinYo
-
 from typing import Union, Any
 from fastapi import Request, Response
 import json
 
-async def getrequestParameter(request: Request) -> dict:
+async def getRequestParameter(request: Request) -> dict:
     data = {}
     if request.method == 'GET':
         data = request.query_params
@@ -22,6 +19,7 @@ class GenerateResponse:
         self.code = 0
         self.message = ''
         self.data = None
+        self.httpCode = 200
         self.streamFormat = False
         self.streamResponse = False
 
@@ -35,13 +33,14 @@ class GenerateResponse:
             return f'data: {responseJSON}\n\n'
         if self.streamResponse:
             return Response(f'data: {responseJSON}\n\n', media_type='text/event-stream')
-        return Response(responseJSON, media_type='application/json')
+        return Response(responseJSON, status_code=self.httpCode, media_type='application/json')
 
-    def error(self, code: int, message: str, streamFormat=False, streamResponse=False) -> TYPE:
+    def error(self, code: int, message: str, streamFormat=False, streamResponse=False, httpCode=200) -> TYPE:
         self.code = code
         self.message = message
         self.streamFormat = streamFormat
         self.streamResponse = streamResponse
+        self.httpCode = httpCode
         return self.generate()
 
     def success(self, data: Any, streamFormat=False) -> TYPE:

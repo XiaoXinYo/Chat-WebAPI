@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
-# Author: XiaoXinYo
-
 HOST = '0.0.0.0' # 地址
-PORT = 5000 # 端口
+PORT = 222 # 端口
 SSL = {
     'enable': False, # 启用SSL
     'keyPath': '', # SSL Key路径

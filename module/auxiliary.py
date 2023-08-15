@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-# Author: XiaoXinYo
-
 import time
 import re
 import json
