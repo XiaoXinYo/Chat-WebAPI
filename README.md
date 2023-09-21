@@ -3,7 +3,7 @@
 2. 若报错,请先将GoogleBard,EdgeGPT,BingImageCreator,revChatGPT,easy-ernie更新到最新版本.
 3. 已知New Bing,文心一言有封号风险.
 ---
-![Release](https://img.shields.io/badge/Release-0.1.4-blue)
+![Release](https://img.shields.io/badge/Release-0.1.5-blue)
 ---
 ## 介绍
 一款基于Python-FastAPI框架,开发的多种Chat WebAPI程序.
