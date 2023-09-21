@@ -31,7 +31,7 @@ body:
     id: python-version
     attributes:
       label: Python版本
-      description: '`python3 -V`'
+      description: '`python -V`'
     validations:
       required: true
   - type: textarea
