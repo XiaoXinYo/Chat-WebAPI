@@ -185,7 +185,5 @@ async def image(request: Request) -> Response:
     keyword = (await core.getRequestParameter(request)).get('keyword')
     if not keyword:
         return core.GenerateResponse().error(110, '参数不能为空')
-    elif not auxiliary.isEnglish(keyword):
-        return core.GenerateResponse().error(110, 'keyword仅支持英文')
 
     return core.GenerateResponse().success(BingImageCreator.ImageGen(IMAGE_COOKIE, all_cookies=chat_bot.BING_COOKIE).get_images(keyword))

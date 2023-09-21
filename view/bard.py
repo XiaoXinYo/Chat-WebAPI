@@ -12,8 +12,6 @@ async def ask(request: Request) -> Response:
     token = parameter.get('token')
     if not question:
         return core.GenerateResponse().error(110, '参数不能为空')
-    elif not auxiliary.isEnglish(question):
-        return core.GenerateResponse().error(110, 'question仅支持英文')
 
     if token:
         chatBot = chat_bot.getChatBot(token)
