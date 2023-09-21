@@ -7,9 +7,7 @@ async def getRequestParameter(request: Request) -> dict:
     if request.method == 'GET':
         data = request.query_params
     elif request.method == 'POST':
-        data = await request.form()
-        if not data:
-            data = await request.json()
+        data = await request.json()
     return dict(data)
 
 class GenerateResponse:
