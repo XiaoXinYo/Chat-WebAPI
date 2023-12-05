@@ -1,10 +1,7 @@
-import nest_asyncio
-nest_asyncio.apply()
-
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from view import chatgpt, bing, bard, ernie
-from module import chat_bot, core
+from view import bard, chatgpt, ernie
+from module import chat, core
 import asyncio
 import config
 import uvicorn
@@ -18,17 +15,16 @@ APP.add_middleware(
     allow_headers=['*'],
 )
 APP.include_router(bard.Bard_APP, prefix='/bard')
-APP.include_router(bing.BING_APP, prefix='/bing')
 APP.include_router(chatgpt.CHATGPT_APP, prefix='/chatgpt')
 APP.include_router(ernie.ERNIE_APP, prefix='/ernie')
 
 @APP.on_event('startup')
 async def startup() -> None:
-    asyncio.create_task(chat_bot.checkChatBot())
+    asyncio.create_task(chat.check())
 
 @APP.on_event('shutdown')
 async def shutdown() -> None:
-    asyncio.create_task(chat_bot.checkChatBot(False))
+    asyncio.create_task(chat.check(loop=False))
 
 @APP.middleware('http')
 async def middleware(request: Request, call_next) -> None:
@@ -41,16 +37,13 @@ async def middleware(request: Request, call_next) -> None:
         else:
             generate = lambda model_: core.GenerateResponse().error(100, f'{model_}未配置', streamResponse=True)
         if model == 'bard':
-            if not chat_bot.BARD_COOKIE:
+            if not chat.BARD_COOKIE:
                 return generate('Bard')
-        elif model == 'bing':
-            if not chat_bot.BING_COOKIE:
-                return generate('Bing')
         elif model == 'chatgpt':
             if not config.CHATGPT_KEY:
                 return generate('ChatGPT')
         elif model == 'ernie':
-            if not chat_bot.ERNIE_COOKIE:
+            if not chat.ERNIE_COOKIE:
                 return generate('文心一言')
 
     response = await call_next(request)
