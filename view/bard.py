@@ -1,7 +1,5 @@
 from fastapi import APIRouter, Request, Response
-from module import core, auxiliary, chat_bot
-import json
-import re
+from module import core, chat
 
 Bard_APP = APIRouter()
 
@@ -14,18 +12,19 @@ async def ask(request: Request) -> Response:
         return core.GenerateResponse().error(110, '参数不能为空')
 
     if token:
-        chatBot = chat_bot.getChatBot(token)
-        if not chatBot:
+        bot = chat.get(token).bot
+        if not bot:
             return core.GenerateResponse().error(120, 'token不存在')
     else:
-        token, chatBot = chat_bot.generateChatBot('Bard')
+        token, bot = chat.generate(chat.Type.BARD)
 
-    data = chatBot.ask(question)
-    url = json.dumps(data['factualityQueries'])
-    urls = re.findall(r'"(http.*?)"', url)
+    data = bot.get_answer(question)
+    urls = data['links']
+    imageUrls = data['images']
+    urls = [url for url in urls if url not in imageUrls]
     return core.GenerateResponse().success({
         'answer':  data['content'],
         'urls': urls,
-        'imageUrls': data['images'],
+        'imageUrls': imageUrls,
         'token': token
     })

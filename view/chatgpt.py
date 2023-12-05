@@ -1,7 +1,7 @@
 from typing import Generator
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import StreamingResponse
-from module import core, chat_bot
+from module import core, chat, chatgpt
 
 CHATGPT_APP = APIRouter()
 
@@ -10,20 +10,33 @@ async def ask(request: Request) -> Response:
     parameter = await core.getRequestParameter(request)
     question = parameter.get('question')
     token = parameter.get('token')
+    model = parameter.get('model')
     if not question:
         return core.GenerateResponse().error(110, '参数不能为空')
 
     if token:
-        chatBot = chat_bot.getChatBot(token)
-        if not chatBot:
+        chat_ = chat.get(token)
+        if not chat_:
             return core.GenerateResponse().error(120, 'token不存在')
+        bot = chat_.bot
+        model_ = chat_.parameter.get('model')
+        if model:
+            if model not in chatgpt.ChatGPT.getModel():
+                return core.GenerateResponse().error(110, 'model不存在')
+            if model != model_:
+                chat.update(token, {'model': model})
+        else:
+            model = model_
     else:
-        token, chatBot = chat_bot.generateChatBot('ChatGPT')
+        if not model:
+            return core.GenerateResponse().error(110, '参数不能为空')
+        elif model not in chatgpt.ChatGPT.getModel():
+            return core.GenerateResponse().error(110, 'model不存在')
+        token, bot = chat.generate(chat.Type.CHATGPT, {'model': model})
 
     try:
         return core.GenerateResponse().success({
-            'answer': chatBot.ask(question),
-            'spend': chatBot.get_token_count(),
+            'answer': bot.ask(model, question),
             'token': token
         })
     except:
@@ -34,33 +47,46 @@ async def askStream(request: Request) -> Response:
     parameter = await core.getRequestParameter(request)
     question = parameter.get('question')
     token = parameter.get('token')
+    model = parameter.get('model')
     if not question:
         return core.GenerateResponse().error(110, '参数不能为空', streamResponse=True)
 
     if token:
-        chatBot = chat_bot.getChatBot(token)
-        if not chatBot:
-            return core.GenerateResponse().error(120, 'token不存在', streamResponse=True)
+        chat_ = chat.get(token)
+        if not chat_:
+            return core.GenerateResponse().error(120, 'token不存在')
+        bot = chat_.bot
+        model_ = chat_.parameter.get('model')
+        if model:
+            if model not in chatgpt.ChatGPT.getModel():
+                return core.GenerateResponse().error(110, 'model不存在')
+            if model != model_:
+                chat.update(token, {'model': model})
+        else:
+            model = model_
     else:
-        token, chatBot = chat_bot.generateChatBot('ChatGPT')
+        if not model:
+            return core.GenerateResponse().error(110, '参数不能为空')
+        elif model not in chatgpt.ChatGPT.getModel():
+            return core.GenerateResponse().error(110, 'model不存在')
+        token, bot = chat.generate(chat.Type.CHATGPT, {'model': model})
     
     def generate() -> Generator:
-        fullAnswer = ''
         try:
-            for answer in chatBot.ask_stream(question):
-                fullAnswer += answer
-                yield core.GenerateResponse().success({
-                    'answer': answer,
-                    'spend': 0,
-                    'done': False,
-                    'token': token
-                }, True)
-            yield core.GenerateResponse().success({
-                'answer': fullAnswer,
-                'spend': chatBot.get_token_count(),
-                'done': True,
-                'token': token
-            }, True)
+            for data in bot.askStream(model, question):
+                if data['done']:
+                    yield core.GenerateResponse().success({
+                        'answer': data['answer'],
+                        'done': True,
+                        'token': token
+                    }, streamFormat=True)
+                    break
+                else:
+                    yield core.GenerateResponse().success({
+                        'answer': data['answer'],
+                        'done': False,
+                        'token': token
+                    }, streamFormat=True)
         except:
             yield core.GenerateResponse().error(500, '未知错误', streamFormat=True)
     return StreamingResponse(generate(), media_type='text/event-stream')

@@ -1,7 +1,7 @@
 from typing import Generator
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import StreamingResponse
-from module import core, chat_bot
+from module import core, chat
 
 ERNIE_APP = APIRouter()
 
@@ -14,13 +14,13 @@ async def ask(request: Request) -> Response:
         return core.GenerateResponse().error(110, '参数不能为空')
 
     if token:
-        chatBot = chat_bot.getChatBot(token)
-        if not chatBot:
+        bot = chat.get(token).bot
+        if not bot:
             return core.GenerateResponse().error(120, 'token不存在')
     else:
-        token, chatBot = chat_bot.generateChatBot('Ernie')
+        token, bot = chat.generate(chat.Type.ERNIE)
 
-    data = chatBot.ask(question)
+    data = bot.ask(question)
     return core.GenerateResponse().success({
         'answer': data['answer'],
         'urls': data['urls'],
@@ -36,14 +36,14 @@ async def askStream(request: Request) -> Response:
         return core.GenerateResponse().error(110, '参数不能为空', streamResponse=True)
     
     if token:
-        chatBot = chat_bot.getChatBot(token)
-        if not chatBot:
+        bot = chat.get(token).bot
+        if not bot:
             return core.GenerateResponse().error(120, 'token不存在', streamResponse=True)
     else:
-        token, chatBot = chat_bot.generateChatBot('Ernie')
+        token, bot = chat.generate(chat.Type.ERNIE)
     
     def generate() -> Generator:
-        for data in chatBot.askStream(question):
+        for data in bot.askStream(question):
             yield core.GenerateResponse().success({
                 'answer': data['answer'],
                 'urls': data['urls'],
