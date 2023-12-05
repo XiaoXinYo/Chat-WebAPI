@@ -20,7 +20,7 @@ message|String|
 data|Object|
 answer|String|
 urls|List|
-images|List|
+imageUrls|List|
 token|String|用于连续对话
 3. 示例:
 ```json
@@ -32,7 +32,7 @@ token|String|用于连续对话
         "urls": [
             "https:bard.google.com(Bard)"
         ],
-        "images": [
+        "imageUrls": [
             "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"
         ],
         "token": "8953d67b-eac2-457e-a2ee-fedc8ba53599"
