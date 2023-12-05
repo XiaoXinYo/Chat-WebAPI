@@ -9,8 +9,6 @@ body:
       options:
         - label: Chat-WebAPI为最新版本
           required: true
-        - label: GoogleBard,EdgeGPT,BingImageCreator,revChatGPT,easy-ernie为最新版本
-          required: true
         - label: 在Issue无法找到它
           required: true
   - type: dropdown
