@@ -1,12 +1,8 @@
 fastapi
-python-multipart
 uvicorn
 gevent
 gunicorn
 asyncio
-nest_asyncio
-GoogleBard
-EdgeGPT
-BingImageCreator
-revChatGPT
+bardapi
+requests
 easy-ernie
