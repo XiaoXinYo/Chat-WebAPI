@@ -22,13 +22,13 @@ class Chat:
     type_: Type
     bot: object
     parameter: dict
-    useTimeStamp: int
+    timestamp: int
 
-    def __init__(self, type_: Type, bot: object, useTimeStamp: int, parameter:dict=None) -> None:
+    def __init__(self, type_: Type, bot: object, timestamp: int, parameter: dict=None) -> None:
         self.type_ = type_
         self.bot = bot
         self.parameter = parameter
-        self.useTimeStamp = useTimeStamp
+        self.timestamp = timestamp
 
 def generate(type_: Type, parameter: dict=None) -> Optional[tuple]:
     global CHAT
@@ -51,7 +51,7 @@ def generate(type_: Type, parameter: dict=None) -> Optional[tuple]:
 def get(token: str) -> Optional[Chat]:
     global CHAT
     if token in CHAT:
-        CHAT[token].useTimeStamp = auxiliary.getTimestamp()
+        CHAT[token].timestamp = auxiliary.getTimestamp()
         return CHAT[token]
     return None
 
@@ -65,7 +65,7 @@ async def check(loop=True) -> None:
     while True:
         for token in CHAT.copy():
             chat = CHAT[token]
-            if auxiliary.getTimestamp() - chat.useTimeStamp > config.TOKEN_USE_MAX_TIME_INTERVAL * 60:
+            if auxiliary.getTimestamp() - chat.timestamp > config.TOKEN_USE_MAX_TIME_INTERVAL * 60:
                 if chat.type_ == Type.BARD:
                     await chat.bot.close()
                 elif chat.type_ == Type.ERNIE:
