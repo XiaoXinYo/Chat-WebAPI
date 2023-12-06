@@ -4,7 +4,7 @@
 3. 已知文心一言有封号风险.
 4. Bing Chat已被暂时移除.
 ---
-![Release](https://img.shields.io/badge/Release-0.1.6-blue)
+![Release](https://img.shields.io/badge/Release-0.1.7-blue)
 ---
 ## 介绍
 一款基于Python-FastAPI框架,开发的多种Chat WebAPI程序.
