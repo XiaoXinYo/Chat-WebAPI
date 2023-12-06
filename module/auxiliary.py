@@ -3,7 +3,7 @@ import re
 import json
 
 def getTimestamp(ms: bool=False) -> int:
-    return int(time.time() * 1 if ms else 1000)
+    return int(time.time() * (1000 if ms else 1))
 
 def isEnglish(keyword: str) -> bool:
     return re.match(r'[a-zA-Z]', keyword)
