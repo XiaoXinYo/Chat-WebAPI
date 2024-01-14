@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Request, Response
 from module import core, chat
 
-Bard_APP = APIRouter()
+BARD_APP = APIRouter()
 
-@Bard_APP.route('/ask', methods=['GET', 'POST'])
+@BARD_APP.route('/ask', methods=['GET', 'POST'])
 async def ask(request: Request) -> Response:
     parameter = await core.getRequestParameter(request)
     question = parameter.get('question')
@@ -12,11 +12,13 @@ async def ask(request: Request) -> Response:
         return core.GenerateResponse().error(110, '参数不能为空')
 
     if token:
-        bot = chat.get(token).bot
-        if not bot:
-            return core.GenerateResponse().error(120, 'token不存在')
+        chatG = chat.get(chat.Type.BARD, token)
+        if not chatG:
+            return core.GenerateResponse().error(110, 'token不存在')
+
+        bot = chatG.bot
     else:
-        token, bot = chat.generate(chat.Type.BARD)
+        token, bot = await chat.generate(chat.Type.BARD)
 
     data = bot.get_answer(question)
     urls = data['links']

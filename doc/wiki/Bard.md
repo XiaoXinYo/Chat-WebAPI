@@ -30,7 +30,7 @@ token|String|用于连续对话
     "data": {
         "answer": "Hello! How can I help you today?",
         "urls": [
-            "https:bard.google.com(Bard)"
+            "https://bard.google.com(Bard)"
         ],
         "imageUrls": [
             "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"

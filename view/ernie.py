@@ -14,11 +14,13 @@ async def ask(request: Request) -> Response:
         return core.GenerateResponse().error(110, '参数不能为空')
 
     if token:
-        bot = chat.get(token).bot
-        if not bot:
-            return core.GenerateResponse().error(120, 'token不存在')
+        chatG = chat.get(chat.Type.ERNIE, token)
+        if not chatG:
+            return core.GenerateResponse().error(110, 'token不存在')
+
+        bot = chatG.bot
     else:
-        token, bot = chat.generate(chat.Type.ERNIE)
+        token, bot = await chat.generate(chat.Type.ERNIE)
 
     data = bot.ask(question)
     return core.GenerateResponse().success({
@@ -36,18 +38,20 @@ async def askStream(request: Request) -> Response:
         return core.GenerateResponse().error(110, '参数不能为空', streamResponse=True)
     
     if token:
-        bot = chat.get(token).bot
-        if not bot:
-            return core.GenerateResponse().error(120, 'token不存在', streamResponse=True)
+        chatG = chat.get(chat.Type.ERNIE, token)
+        if not chatG:
+            return core.GenerateResponse().error(110, 'token不存在', streamResponse=True)
+
+        bot = chatG.bot
     else:
-        token, bot = chat.generate(chat.Type.ERNIE)
+        token, bot = await chat.generate(chat.Type.ERNIE)
     
-    def generate() -> Generator:
+    async def generate() -> Generator:
         for data in bot.askStream(question):
             yield core.GenerateResponse().success({
                 'answer': data['answer'],
                 'urls': data['urls'],
                 'done': data['done'],
                 'token': token
-            }, True)
+            }, streamFormat=True)
     return StreamingResponse(generate(), media_type='text/event-stream')

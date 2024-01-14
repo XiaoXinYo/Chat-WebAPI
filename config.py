@@ -1,12 +1,19 @@
-HOST = '0.0.0.0' # 地址
-PORT = 222 # 端口
-SSL = {
-    'enable': False, # 启用SSL
-    'keyPath': '', # SSL Key路径
-    'certPath': '' # SSL Cert路径
+HTTP = {
+    'host': '0.0.0.0', # HTTP地址
+    'port': 222, # HTTP端口
+    'ssl': {
+        'enable': False, # 启用HTTP SSL
+        'keyPath': '', # HTTP SSL Key路径
+        'certPath': '' # HTTP SSL Cert路径
+    }
 }
 
-PROXY = '' # 代理
+PROXY = {
+    'enable': False, # 启用代理
+    'host': '', # 代理地址
+    'port': 80, # 代理端口,
+    'ssl': False # 启用代理SSL
+}
 
 CHATGPT_KEY = '' # ChatGPT密钥
 

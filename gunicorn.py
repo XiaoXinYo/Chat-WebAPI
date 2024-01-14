@@ -1,9 +1,9 @@
-from config import HOST, PORT, SSL
+from config import HTTP
 
 workers = 1
 worker_class = 'uvicorn.workers.UvicornWorker'
 
-bind = f'{HOST}:{PORT}'
-if SSL['enable']:
-    keyfile = SSL['keyPath']
-    certfile = SSL['certPath']
+bind = f'{HTTP["host"]}:{HTTP["port"]}'
+if HTTP['ssl']['enable']:
+    keyfile = HTTP['ssl']['keyPath']
+    certfile = HTTP['ssl']['certPath']
