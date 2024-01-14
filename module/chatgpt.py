@@ -22,7 +22,6 @@ class ChatGPT:
 
     def checkJson(self, data: str) -> None:
         try:
-            print(data)
             data = json.loads(data)
         except:
             raise Exception('请求失败,响应格式错误')
@@ -30,8 +29,7 @@ class ChatGPT:
         if 'error' in data:
             raise Exception(f'请求失败,{data["error"]["message"]}')
 
-    def request(self, method: str, url: str, data: Optional[dict] = None, stream=False,
-                check=True) -> requests.Response:
+    def request(self, method: str, url: str, data: Optional[dict] = None, stream=False, check=True) -> requests.Response:
         if method == 'get':
             self.response = self.session.get(url, params=data, stream=stream)
         else:
@@ -82,7 +80,8 @@ class ChatGPT:
             data = line[6:]
             data = json.loads(data)
             choices = data['choices'][0]
-            if answer := choices['delta'].get('content'):
+            answer = choices['delta'].get('content')
+            if answer:
                 fullAnswer += answer
                 yield {
                     'answer': answer,

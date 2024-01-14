@@ -1,12 +1,19 @@
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from view import bard, chatgpt, ernie
+from contextlib import asynccontextmanager
+from view import bard, bing, chatgpt, claude, ernie
 from module import chat, core
 import asyncio
 import config
 import uvicorn
 
-APP = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    asyncio.create_task(chat.check())
+    yield
+    await chat.check(loop=False)
+
+APP = FastAPI(lifespan=lifespan)
 APP.add_middleware(
     CORSMiddleware,
     allow_origins=['*'],
@@ -14,17 +21,11 @@ APP.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
-APP.include_router(bard.Bard_APP, prefix='/bard')
+APP.include_router(bard.BARD_APP, prefix='/bard')
+APP.include_router(bing.BING_APP, prefix='/bing')
 APP.include_router(chatgpt.CHATGPT_APP, prefix='/chatgpt')
+APP.include_router(claude.CLAUDE_APP, prefix='/claude')
 APP.include_router(ernie.ERNIE_APP, prefix='/ernie')
-
-@APP.on_event('startup')
-async def startup() -> None:
-    asyncio.create_task(chat.check())
-
-@APP.on_event('shutdown')
-async def shutdown() -> None:
-    asyncio.create_task(chat.check(loop=False))
 
 @APP.middleware('http')
 async def middleware(request: Request, call_next) -> None:
@@ -33,15 +34,21 @@ async def middleware(request: Request, call_next) -> None:
         model = urls[1]
         mode = urls[2]
         if mode == 'ask':
-            generate = lambda model_: core.GenerateResponse().error(100, f'{model_}未配置')
+            generate = lambda model: core.GenerateResponse().error(100, f'{model}未配置')
         else:
-            generate = lambda model_: core.GenerateResponse().error(100, f'{model_}未配置', streamResponse=True)
+            generate = lambda model: core.GenerateResponse().error(100, f'{model}未配置', streamResponse=True)
         if model == 'bard':
             if not chat.BARD_COOKIE:
                 return generate('Bard')
+        elif model == 'bing':
+            if not chat.BING_COOKIE:
+                return generate('Bing')
         elif model == 'chatgpt':
             if not config.CHATGPT_KEY:
                 return generate('ChatGPT')
+        elif model == 'claude':
+            if not chat.CLAUDE_COOKIE:
+                return generate('Claude')
         elif model == 'ernie':
             if not chat.ERNIE_COOKIE:
                 return generate('文心一言')
@@ -59,10 +66,10 @@ def error500(request: Request, exc: Exception) -> Response:
 
 if __name__ == '__main__':
     appConfig = {
-        'host': config.HOST,
-        'port': config.PORT,
+        'host': config.HTTP['host'],
+        'port': config.HTTP['port']
     }
-    if config.SSL['enable']:
-        uvicorn.run(APP, **appConfig, ssl_keyfile=config.SSL['keyPath'], ssl_certfile=config.SSL['certPath'])
+    if config.HTTP['ssl']['enable']:
+        uvicorn.run(APP, **appConfig, ssl_keyfile=config.HTTP['ssl']['keyPath'], ssl_certfile=config.HTTP['ssl']['certPath'])
     else:
         uvicorn.run(APP, **appConfig)

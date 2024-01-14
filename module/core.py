@@ -3,12 +3,12 @@ from fastapi import Request, Response
 import json
 
 async def getRequestParameter(request: Request) -> dict:
-    data = {}
+    result = {}
     if request.method == 'GET':
-        data = request.query_params
+        result = request.query_params
     elif request.method == 'POST':
-        data = await request.json()
-    return dict(data)
+        result = await request.json()
+    return dict(result)
 
 class GenerateResponse:
     TYPE = Union[str, Response]

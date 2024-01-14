@@ -1,8 +1,9 @@
 fastapi
 uvicorn
-gevent
 gunicorn
 asyncio
 bardapi
+re_edge_gpt
 requests
+unofficial-claude2-api
 easy-ernie
